@@ -12,44 +12,18 @@ const PORT = process.env.PORT || 5050;
 
 // CORS configuration
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.CLIENT_ORIGIN_PROD]
-  : [process.env.CLIENT_ORIGIN_DEV, 'http://localhost:8080', 'http://localhost:5173', 'http://127.0.0.1:8080', 'http://127.0.0.1:5173'];
+  ? (process.env.CLIENT_ORIGIN_PROD ? process.env.CLIENT_ORIGIN_PROD.split(',').map(origin => origin.trim()) : [])
+  : (process.env.CLIENT_ORIGIN_DEV ? process.env.CLIENT_ORIGIN_DEV.split(',').map(origin => origin.trim()) : []).concat(['http://localhost:8080', 'http://localhost:5173', 'http://127.0.0.1:8080', 'http://127.0.0.1:5173']);
+
+console.log('Allowed Origins:', allowedOrigins);
 
 // Enable CORS for all routes
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
-
-// Additional CORS headers middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
-    res.status(204).end();
-    return;
-  }
-  next();
-});
 
 app.use(express.json());
 

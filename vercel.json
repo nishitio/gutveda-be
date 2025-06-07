@@ -17,10 +17,5 @@
         "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization"
       }
     }
-  ],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret",
-    "ADMIN_PASSWORD": "@admin_password"
-  }
+  ]
 } 
